@@ -1,0 +1,77 @@
+README Arhip Alin-Gabriel , 342C3
+
+Fisiere:
+main.c - codul sursa al temei
+Makefile - contine target-uri de build si clean 
+	 - build creaza executabilul numit "main"
+README - detalii de implementare a temei
+
+Main.c este alcatuit din 4 functii :
+	- functia main ce initializeaza mediul MPI
+	- functia master() apelata doar de master
+	- functia worker() apelata de toate procesele
+	mai putin masterul deoarece acesta apeleaza
+	direct functia algorithm.
+	- functia algorithm() apelata de 
+	toate procesele ( inclusiv master-ul )
+	
+Functia main - se apeleaza master() sau worker()
+		in functie de rank-ul curent.
+Functia master - se apeleaza doar de master.
+Functia worker - se apeleaza de toate procesele.
+Functia algorithm - contine implementarea algoritmilor
+		  Mandelbrot si Julia, deoarece functia 
+		  aplicata intr-un punct este aceeasi,
+		  singurul lucru care difera sunt numerele
+		  complexe z si c , de aceea functia algorithm 
+		  primeste ca parametru tipul multimii si in 
+		  functie de acesta, initializeaza numerele z
+		  si c cu valorile tipului de multime pentru 
+		  care se doreste calcularea imaginii.
+
+Tema a fost oarecum straight-forward: 
+Am pornit de la 0 si am scris un main in care pentru rank=0 
+se executa functia master()  ce realizeaza 5 pasi pe care i-am 
+evidentiat si in comentariile din cod :
+/* PAS 1 - citire fisier input */
+/* PAS 2 - creare si pasare lucru catre fiecare worker */
+/* PAS 3 - prelucrarea liniilor de catre procesul master */
+/* PAS 4 - colectare rezultate linie cu linie, de la celelalte procese, 
+creare output */
+/* PAS 5 - afisare output in format pgm*/
+
+Pentru orice alt rank se va executa functia worker(), ce 
+realizeaza 2 pasi:
+/* PAS 1 - colectare informatii de la master */
+/* PAS 2 - Aplica algoritmul corespunzator in punctul(i,j) 
+	 in functie de tipul multimii */
+	 
+In cadrul functiei worker() se primeste bufferul 
+trimis din master si astfel workerul are acces la informatiile
+necesare pentru prelucrarea portiunii din matricea finala.
+Tot in cadrul functiei worker se apeleaza metoda algorithm()
+ce calculeaza valoarea matricii finale in fiecare punct dat, 
+aplicand algoritmul corespunzator.
+
+Operatiile de send si receive sunt in felul urmator:
+
+Masterul face Send blocant la procesele trimitand la fiecare
+un numar egal de linii de prelucrat din matricea finala , mai 
+putin la ultimul proces care va avea restul de linii, in caz 
+ca nu se poate imparti in mod egal numarul de linii la procese.
+Mai departe Masterul face Receive blocant de la toate procesele
+primind cate o linie calculata si inializand matricea finala
+cu linia primita.
+ 
+Workerul face Receive blocant, primind informatiile de la master
+dupa care pentru fiecare linie alocata acestuia din matricea finala
+calculeaza valoarea in fiecare punct, in functie de tipul multimii, 
+si dupa ce a terminat linia respectiva se face Send blocant la master,
+ca sa poata trece la linia urmatoare. 	
+
+Probleme intampinate:
+ Initial nu am folosit alocare dinamica deloc.
+ Dar pe testul mandelbrot1.in dimensiunea outputului este de 
+ 5000x5000 lucru care nu putea fi suportat pe heap, si crapa intr-una
+ MPI-ul,  cu niste erori urate, chiar mi-a luat putin pana m-am prins,
+ de aceea am fost nevoit sa aloc dinamic matricea de output.

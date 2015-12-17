@@ -1,0 +1,12 @@
+Rezultate pentru: (doc1.txt)
+
+doc2.txt (1.021%)
+doc3.txt (0.912%)
+doc4.txt (0.711%)
+
+doc2.txt;doc3.txt;1.224%
+doc2.txt;doc4.txt;1.215%
+doc1.txt;doc2.txt;1.190%
+doc3.txt;doc4.txt;1.139%
+doc1.txt;doc3.txt;1.062%
+doc1.txt;doc4.txt;1.053%

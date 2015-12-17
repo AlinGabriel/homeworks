@@ -1,0 +1,47 @@
+Arhip Alin-Gabriel, 342C3
+README
+Tema 4 APD : Simularea unei retele in MPI
+
+Arhiva temei:
+	main.c	- implementarea propriu zisa
+	Makefile 
+	README	
+	topologie.txt - fisier de test ce contine topologia
+	mesaje.txt 	- fisier din care se citesc mesajele de transmis
+	
+In urma comenzii make , numele executabilul va fi "tema4".
+Mod de testare tema:
+	mpirun -np 12 tema4 topologie.txt mesaje.txt	
+
+ETAPA 1:
+	Am implementat descoperirea topologiei ca in laboratorul 10.
+Dupa ce fiecare nod are toata topologia folosesc algoritmul
+Floyd-Warshall ca sa calculez distantele minime si apoi
+determin next-hop-urile pentru toate destinatiile fiecarui nod.
+In finala afisez la stdout tabele de rutare ale fiecarui proces
+iar pentru procesul cu id-ul 0 afisez intreaga matrice de adiacenta.
+ETAPA 2:
+	Mesajele de broadcast se trimit la toate nodurile bazandu-se 
+pe arborele de acoperire construit de la creearea topologiei.
+	La fiecare pas al mesajului prin noduri se afiseaza la stdout
+spunand in ce nod a ajuns si catre ce nod se duce.
+Deasemenea pentru mesajele de tip broadcast fiecare nod care il
+primeste si la randul lui face rebroadcast spune acest lucru la stdout.
+ETAPA 3:
+	Fiecare nod alege un seed random inmultind valoarea returnata
+de time cu rank-ul procesului ca sa obtin mereu un numar intre 0 ultimul 
+nod si evitand ca nodul sa se aleaga pe sine insusi folosind o conditie 
+in plus.In functie de acest seed se alege votul. 
+Procesul cu rank 0 centralizeaza voturile si determina daca alegerea a 
+fost cu success. Daca in urma numararii voturilor nu s-a putut stabili
+un lider si/sau un adjunct algoritmul se va relua pana cand se va putea
+alege un lider si adjunct. Niciun nod nu se voteaza pe sine insusi.
+	Fiecare proces afiseaza la stdout votul sau si la final procesul
+cu rank 0 afiseaza rezultatele alegilor. 
+	Daca liderul/adjunctul nu s-a ales (desi este imposibil pentru 
+ca se cicleaza la infinit pana cand se vor alege) atunci ei vor fi 
+initializati cu -1.
+
+Recomandari: daca doriti sa vizualizati outputul etapei 1 nu folositi 
+comanda sort, aceasta le va amesteca intre ele si nu se va mai intelege 
+nimic din tabelele de rutare sau matricea de adiacenta.

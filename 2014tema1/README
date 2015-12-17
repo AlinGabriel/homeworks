@@ -1,0 +1,98 @@
+/* Tema 1 APD
+ * Arhip Alin-Gabriel 342C3
+ * Octombrie 2014
+ * README - Detaliere implementare tema1
+ */
+
+Specificatiile laptopului personal :
+	Intel Core i3 CPU M 330 @ 2.13GHz × 2 
+	SO: Linux Mint "Maya" 13 @ 64-bit
+	RAM: 5.6 GiB
+	
+Timpi de rulare pentru tema1:
+	- in varianta seriala: 
+				real	0m0.675s
+				user	0m0.668s
+				sys	0m0.004s
+	- utilizand 2 thread-uri: 
+				real	0m0.350s
+				user	0m0.684s
+				sys	0m0.008s
+
+
+Se observa proprietatea de scalabilitate a algoritmului.
+Local nu am putut testa cu 4 thread-uri, dar voi testa pe fep.
+In urma testarii pe fep obtin urmatoarele rezultate:
+
+Pentru test1.txt: (cu 1,2,4 si respectiv 8 thread-uri)
+	
+	[alin.arhip@fep-62-2 ~]$cat script.sh.e661053 
+		real	0m0.673s
+		user	0m0.663s
+		sys	0m0.004s
+
+		real	0m0.354s
+		user	0m0.699s
+		sys	0m0.003s
+
+		real	0m0.192s
+		user	0m0.748s
+		sys	0m0.006s
+
+		real	0m0.114s
+		user	0m0.882s
+		sys	0m0.002s
+	
+Pentru test2.txt: (cu 1,2,4 si respectiv 8 thread-uri)
+
+	[alin.arhip@fep-62-2 ~]$cat script.sh.e661053 
+		real	0m0.670s
+		user	0m0.664s
+		sys	0m0.003s
+		
+		real	0m0.353s
+		user	0m0.697s
+		sys	0m0.002s
+
+		real	0m0.192s
+		user	0m0.750s
+		sys	0m0.006s
+
+		real	0m0.113s
+		user	0m0.872s
+		sys	0m0.004s
+
+Si acum se observa scalabilitatea algoritmului.
+
+DETALIEREA IMPLEMENTARII:
+
+	Am folosit 2 functii ajutatoare: 
+Functia getNeighborCount:
+ 	care imi returneaza numarul de vecini a unei pozitii din harta
+ 	data ca parametru, fie ca este gol sau individ.
+Functia makeToroidalMatrix:
+	care converteste harta intr-un toroid, adica o bordeaza astfel
+	incat prima linie/coloana este lipita de ultima linie/coloana,
+	si care se apeleaza la fiecare etapa pentru actualizarea 
+	toroidului.
+
+Main-ul contine citirea din fisier, algoritmul implementat,
+	precum si scrierea in fisierul de output.
+	Am ales sa stochez harta de la coordonatele (1,1) - coltul
+	din stanga sus , pentru a putea sa o bordez cu zerouri in caz
+	ca este in plan, sau sa o transform in toroid altfel.
+	
+	Algoritmul este destul de straight-forward:
+	Complexitatea este O(N*h*w).
+	Pentru fiecare etapa, pentru fiecare element din harta calculez
+	numarul de vecini, satisfac conditii din enunt si creez noua harta
+	dupa care o pasez catre harta veche ca sa pot trece la urmatoarea 
+	etapa. 
+	
+	In final calculez coordonatele celui/celor mai din dreapta-jos individ
+	/indivizi pentru a afisa harta nu in intregime, ci doar cel mai mare 
+	dreptunghi incepand de la (0,0) , adica (1,1) in cazul meu,  si apoi 
+	o scriu in fisierul de output.
+	
+Reached end of README. Arhip Alin-Gabriel.   
+

@@ -1,0 +1,82 @@
+/* Tema 2 APD
+ * Arhip Alin-Gabriel 342C3
+ * Noiembrie 2014
+ * Indexarea unui set de documente in Java
+ * implementare paralela utilizand paradigma 
+ * Replicated Workers si modelul MapReduce. 
+ */
+ 
+Continut arhiva : folder src/ 2 surse java
+ 			- ReplicatedWorkers.java 
+ 			- WorkPool.java
+ 		   build.xml - fisierul de ant
+
+Mod de utilizare: ant compile jar
+		  java -jar mapreduce.jar <NT> <input> <output>
+ 
+Clasa WorkPool - preluata din laboratorul 5 cu ReplicatedWorkers
+	       - contine trei LinkedList: una ptr Map, una ptr Reduce si una ptr Compare.
+	       - am creat metode de GET si PUT  pentru fiecare din cele trei operatii.
+	     
+Clasa ReplicatedWorkers(clasa principala): in care fac citirea din fisierul de input,
+			 impartirea fisierele in fragmente si punerea fragmentelor in 
+			 workpool de MAP creez task-urile de MAP, asignez workeri de MAP, 
+			 apoi creez task-uri de REDUCE, asignez workeri de REDUCE intr-un 
+			 alt workpool si  apoi creez task-uri de COMPARE intr-un al treilea
+			 workpool si asignez workeri de COMPARE. 
+			 Workerii sunt diferentiati printr-o variabila denumita "type" astfel:
+			 1 = workerii executa MAP
+			 2 = workerii executa REDUCE
+	     		 3 = workerii executa COMPARE
+
+Clasa Pair 		- clasa ajutatoare ce retine o pereche de tip nume_document si un
+			  hash realizat in urma unei operatii de MAP aplicata pe un fragment
+			  din nume_document. Am creat set-ere si get-ere pentru ambele 
+			  elemente ale perechii.
+
+Clasa OperationMap 	- contine numele fisierului filename, offsetul de start, dimensiunea d,
+			  si file descriptorul fisierului din care trebuie sa extraga un fragment.
+		      	- un HashMap in care retin fiecare cuvant si numarul de aparitii : rez_map
+	    	      	- metoda map - face map pe fragment si completeaza HashMap-ul. Am folosit
+	    	      	  StringTokenizer, verific fiecare cuvant din fragment: daca
+		     	  nu exista in hash il adaug, altfel ii incrementez nr. de aparitii.
+
+Clasa OperationReduce 	- contine numele fisierului filename
+			- o lista de hash-uri : lista tuturor MAP-urilor facute pe un fisier. 
+			- un HashMap de String,HashMap in care retin (fisier,(cuvinte,aparitii)) : rez_reduce
+			- iterez prin lista de hash-uri in felul urmator: extrag un hash, verific 
+			  daca cuvintele sale se afla in rez_reduce daca nu le adaug, altfel incrementez
+			  numarul de aparitii.
+			  (Am sincronizat operatia de reduce deoarece aveam eroare de tip NullPointerException
+			  cand mai multe threaduri incercau in acelasi timp sa extraga cate un hash in 
+			  hash-ul "intermediar" utilizat pentru a verifica existenta cuvintelor dintr-un hash
+			  din lista_hashuri cu hash-ul final de reduce: rez_reduce )
+	      
+Clasa OperationCompare  - contine numele a doua fisiere ce se compara: file1 si file2;
+			- doua HashMap in care retin hash-ul de tip (cuvinte,aparitii) din file1 si file2
+			- alte doua HashMap in care calculez frecventele cuvintelor
+			- si un TreeMap	de Float,HashMap de tip (grad,(file1,file2)) in care stochez in ordine 
+			  descrescatoare a gradul de similaritate, numele celor doua fisiere.
+			- iterez prin hash-urile celor doua fisiere, calculez frecventele tuturor cuvintelor,
+			  si apoi calculez gradul lor de similaritate folosind formulele din enuntul temei. 
+
+Clasa Worker - contine  - preluata din laboratorul 5, contine: "type" tipul workerului (Map / Reduce / Compare) 
+			- un WorkPool
+			- un ArrayList de HashMap in care retin cele nr_fragmente de hash-uri de MAP ale
+			  unui fisier, in vederea combinarii imediate in operatia de REDUCE : lista_hashuri 
+ 			- un HashMap ajutator in care retin o operatie de MAP si o adaug in lista_hashuri
+			- metoda processOperationMap care primeste ca parametru un obiect de tip OperationMap si 
+			  apeleaza metoda map din OperationMap, executa MAP , retuneaza hash-ul unui MAP si 
+			  il pune in lista_hashuri. 
+			  (Am sincronizat operatia de adaugare in ArrayList deoarece aveam probleme de tip 
+			  IndexOutOfBounds cand mai multe threaduri incercau in acelasi timp sa adauge in lista)
+			- processOperationReduce care primeste un obiect de tip OperationReduce, apeleaza
+			  metoda reduce din OperationCompare, executa REDUCE si goleste ArrayList-ul
+			  in vederea efectuarii operatiilor de MAP pentru urmatorul fisier.
+			- processOperationCompare care primeste un obiect de tip OperationCompare, apeleaza
+			  metoda compare din OperationCompare care executa COMPARE intre doua documente.
+			  fisierul primit ca parametru prin MyReduce si fisierul care trebuie comparat
+			- metoda run: verifica tipul workerului, scoate un task dintr-un workpool si il da 
+			  workerilor sa il prelucreze
+			  
+END OF README.txt

@@ -1,0 +1,25 @@
+<project>
+
+    <target name="clean">
+        <delete dir="build"/>
+        <delete dir="." includes="*.jar"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="build/classes"/>
+        <javac srcdir="./src" destdir="build/classes" includeantruntime="false"/>
+    </target>
+
+    <target name="jar">
+        <jar destfile="mapreduce.jar" basedir="build/classes">
+            <manifest>
+                <attribute name="Main-Class" value="ReplicatedWorkers"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run">
+        <java jar="mapreduce.jar" fork="true"/>
+    </target>
+
+</project>

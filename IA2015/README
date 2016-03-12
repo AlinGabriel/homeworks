@@ -11,56 +11,63 @@ iar restul jucatorilor vor fi automat boti de joc.
 
 Mod de rulare: Eclipse>Run
 Se selecteaza numarul de jucatori umani intre 0 si 4.
-Daca se tasteaza 0, se va juca un joc intre intre boti.
+Daca se tasteaza 0, se va juca un joc numai intre boti.
 Daca se tasteaza 4, se va juca un joc numai intre jucatori
-umani, care is vor avea pe rand tura.
+umani, in care fiecare va muta pe rand. 
 
-Computerul ofera indicatii cu privirile la mutarile valide
-pe care le poate fiecare jucator in parte. 
+Indiferent de numarul de jucatori umani sau boti, ordinea 
+de joc va fi intotdeauna urmatoarea: Red, Blue, Yellow, Green.
+
+De fiecare data cand jucatorul uman se afla la mutare, 
+computerul va oferi indicatii cu privirile la mutarile valide
+pe care le poate fiecare jucator in parte.
 Astfel calculcatorul va indica mutarile valide printr-un 
 asterisk(*) pe tabla de joc, urmand ca apoi sa indice
 cea mai buna mutare prin caracterul diez(#). Acesta va
 ajuta fiecare jucator uman in parte, cand ii vine tura. 
 In spate se ruleaza acelasi algoritm pe care il folosesc 
-si botii. Astfel se obtine mutarea pe care ar face computerul, 
-daca ar fi in locul jucatorului.
+si botii. Altfel spus, aceea este mutarea pe care ar face-o 
+computerul la acel pas, daca ar fi in locul jucatorului.
 
-O mutare valida se defineste fie ca o mutare care converteste
-cel putin o alta piesa a oricarui oponent, sau daca nu exista 
-nici o astfel de mutare posibila, se va putea muta oriunde 
-pe tabla, adiacent la orice piesa.
+O mutare VALIDA se defineste fie ca o mutare care converteste
+CEL PUTIN o alta piesa a oricarui oponent, iar DACA nu exista 
+nici o astfel de mutare posibila, se va muta oriunde 
+pe tabla, ADIACENT la o piesa a oricarui jucator.
+
+Computerul va afisa scorul fiecarui jucator la fiecare pas.
 
 Pentru un jucator uman se foloseste functia humanPlayerMove()
 care asteapta inputul jucatorului in privinta liniei si coloanei
 unde se doreste a se muta. Apoi se verifica daca mutarea este 
-valida altfel se cere introducerea altei mutari. 
+valida, altfel se cere introducerea altei mutari. 
 Apoi se efectueaza mutarea si se apeleaza functia
-checkPonta() care converteste piesele cucerita la culoarea 
+checkPonta(). Aceasta converteste piesele "cucerite" la culoarea 
 jucatorului. In final se printeaza mutarea jucatorului uman 
 si se continua jocul cu mutarea urmatorilor oponenti.
 
-Am creat un algoritm de tip Monte-Carlo Search Tree in felul 
-urmator:
-
+Am creat un algoritm asemanator cu Monte-Carlo Search Tree:
 Pentru a muta un bot apeleaza functia - ComputerMove():
 Aceasta la randul ei apeleaza o functie numita getPossibleMoves()
 ce returneaza toate mutarile legale pe care le poate face bot-ul.
 Apoi botul apeleaza metoda determineBestMove(), metoda care 
 pentru fiecare mutare din cele valabile, va rula 100 de jocuri
 in care fiecare jucator muta random pe tabla de joc ( acest lucru
-se realizeaza apeland metoda randomPlay() - ce ruleaza un joc random
-) si returneaza pentru fiecare mutare un scor (numarul de victorii). 
-La fiecare mutare, botul retine scorul maxim, adica mutarea care ii 
-va aduce cel mai mare numar de victorii. Cand s-au terminat mutarile 
-posibile, botul va sti care este mutarea sa cea mai buna si o va face.
-Mutarea cea mai buna se defineste ca fiind mutarea care ii va aduce 
-cele mai multe victorii in 100 de jocuri.
+se realizeaza apeland metoda randomPlay() - care in spate va
+rula un joc random) si va returna pentru fiecare mutare 
+un scor (numarul de victorii: 0 <= scor <= 100)
+Botul nu va retine scorul fiecare mutari, ci doar mutarea cu 
+scorul maxim, fiind sigur ca aceea ii va aduce victoria,
+deoarece are cel mai mare numar de victorii. Cand s-a terminat si 
+ultima mutare posibila, botul va sti care este mutarea cea mai buna.
 
-Codul este foarte comentat, am explicat concret ce face fiecare metoda.
+Codul este comentat, am explicat succint fiecare metoda si am adaugat
+comentarii acolo unde am considerat necesara o explicatie.
 Pentru detalii de implementare, vizualizati codul. 
-Tema a fost foarte interesanta, in principiu am stat foarte mult pe 
-mecanica jocului : convertirea pe linii si coloane a fost relativ ok
-Insa convertirea pe diagonale a fost mai dificila.
+Tema a fost foarte interesanta. Am totusi o mica observatie:
+Ma asteptam sa stau mai mult pe algoritm, insa am stat mai mult pe 
+mecanica jocului: convertirea pe linii si coloane a fost ok, 
+insa convertirea pe diagonale a fost ceva mai dificila, pana m-am prins
+cum se face.
 
 Final Readme
 Student: Arhip Alin-Gabriel, Grupa 342C3

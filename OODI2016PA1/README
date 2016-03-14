@@ -1,0 +1,24 @@
+Project Assignment 1 
+Object Oriented Design and Implementation
+Author: Arhip Alin Gabriel
+Artificial Intelligence Master Program, first year.
+ 
+Simple Java Drawing Application using AWT and Swing.
+It can draw rectangles and circles of
+three colors: red, green and blue. It also shows the
+current date.
+ 
+When the exit button is clicked, the GUI
+serializes the figures and content of the text area
+to disk in a file named "figures",
+basically saving the current state of the drawings.
+
+When the GUI is started, it will check for the existence
+of the "figures" file and if exists, opens it and populates
+the figures and the corresponding content in the text area,
+deserializing any saved figures and redrawing them.
+ 
+The "X" Close Button was created intentionally to not
+save any contents. For this purpose exists the
+"Exit" button.
+ 

@@ -258,7 +258,7 @@ public class UserInterface {
 			String itemID = getToken("Enter item id");
 			result = library.issueItem(memberID, itemID);
 			if (result != null){
-				System.out.println(result.getTitle()+ " issued");
+				System.out.println(result.getTitle()+ " issued: " + result.getDueDate().getTime().toString());
 			} else {
 				System.out.println("Item could not be issued");
 			}
@@ -286,9 +286,9 @@ public class UserInterface {
 			if (yesOrNo(item.getTitle())) {
 				result = library.renewItem(item.getId(), memberID);
 				if (result != null){
-					System.out.println(result.getTitle()+ " renewed");
+					System.out.println(result.getTitle()+ " renewed: " + result.getDueDate().getTime().toString());
 				} else {
-					System.out.println("Item is not renewable");
+					System.out.println("Item could not be renewed");
 				}
 			}
 		}

@@ -1,0 +1,77 @@
+Arhip Alin-Gabriel 342C3
+Tema 4 SPRC - ( Implementarea unui serviciu securizat de gestiune a documentelor)
+
+Continut arhiva:
+	- directorul certification_authority/  
+		-  contine certificatul si cheile CA-ului
+	- directorul authorization_server/
+		- src/  - sursele serviciului de autorizare
+		- security/  - certificatele si keystore-urile
+		- banned_encrypted  - fisier in care se retin (criptat) numele
+			utilizatorilor interzisi
+		- build.xml  - fisierul de build Ant
+	- directorul files_server/
+		- src/  - codul sursa al serverului
+		- security/  - certificatele si keystore-urile
+		- files/  - directorul in care se tin documentele uploadate de useri
+		- files_encrypted  - fisier in care se retin (criptat) numele
+			fisierelor gestionate
+		- build.xml  - fisierul de build Ant
+	- directorul client/
+		- src/  - codul sursa al clientului
+		- upload/  - director cu fisiere pe care clientul le incarca
+		- download/  - director cu fisiere pe care clientul le-a descarcat
+		- security/  - certificatele si keystore-urile
+		- run.sh  - script de rulare
+		- build.xml  - fisierul de build Ant
+
+Pregenerarea de chei:
+	- prerequisites.sh:  creeaza certificatul CA si al serviciului de
+		autorizare, semneaza certificatul SA si importa certificatul CA in SA
+		si reciproc
+	- server.sh:  genereaza informatiile de securitate asociate serverului de
+		fisiere (inclusiv certificatele CA si SA)
+	- client.sh:  creeaza in 'client/security' un subdirector cu numele dat ca
+		prim parametru, unde vor fi depuse informatiile de securitate asociate
+		clientului specificat (inclusiv certificatele CA si SA)
+	- post.sh:  importa certificatul fiecarui client catre server si
+		certificatul serverului de departament catre fiecare client
+	
+Rulare si testare:
+	- Generarea de certificate:
+		> ./prerequisites.sh
+		> ./server.sh
+		> ./client.sh alin IT
+		> ./client.sh andrei ACCOUNTING
+		> ./post.sh
+	- Lansare in executie (4 terminale diferite):
+		- Compilarea si rularea serviciului de autorizare:
+		terminal1	> cd authorization_server; ant		
+				# compileaza + ruleaza
+		- Compilarea si rularea serverului de fisiere:
+		terminal2	> cd files_server; ant				
+				# compileaza + ruleaza
+		- Compilarea si rularea clientilor:
+		terminal3	> cd client; ant					
+				# doar compileaza
+					> ./run.sh 1  # ruleaza pentru alin/IT  
+				# datele de rulare sunt hardcodate (se modifica in script)				
+		terminal4	> cd client
+					> ./run.sh 2  # ruleaza pentru andrei/ACCOUNTING
+	- Testare:
+		client1	> list  # Raspuns: lista goala
+				> upload lipsum  # Raspuns: fisier uploadat cu succes
+		client2	> list  # Raspuns: lista ce contine doar 'lipsum'
+				> download lipsum  # Revocat de server (drepturi insuficiente)
+				> upload xxx  # Raspuns: fisier uploadat cu succes
+		client1	> list  # Raspuns: lista 'xxx', 'lipsum'
+				> download xxx  # Raspuns: fisier downloadat cu succes
+								# Fisierul va aparea in directorul download/
+				> bomba  # Raspuns: Primeste interdictie
+				> download xxx  # Revocat de server (clientul are interdictie)
+		client2	> download xxx  # Raspuns: fisier downloadat cu succes
+								# Fisierul va aparea in directorul download/
+
+Formatul de serializare a listei de fisiere scrise in fisier:
+	- fisier1~clientX~departX|fisier2~clientY~departY|fisier3~clientX~departX
+Alte detalii de implementare sunt specificate in codul sursa

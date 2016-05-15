@@ -1,0 +1,86 @@
+<project name="4temaSPRC" default="compile" basedir=".">
+
+    <property name="build.dir"    value="build"/>
+    <property name="src.dir"    value="src"/>
+    <property name="axis.dir"    value="/home/alin/Downloads/axis-1_4/"/>
+    <property name="catalina.dir"    value="/home/alin/Downloads/apache-tomcat-6.0.36/"/>
+    <property name="deploy.dir"    value="${catalina.dir}/webapps/axis/WEB-INF/classes/"/>
+
+
+    <path id="master-classpath">
+        <!-- Include all elements that Tomcat exposes to applications -->
+        <pathelement location="${catalina.dir}/common/classes"/>
+        <pathelement location="${catalina.dir}/classes"/>
+        <fileset dir="${catalina.dir}/lib">
+            <include name="*.jar"/>
+        </fileset>
+
+        <!-- Include all elements from Axis -->
+        <pathelement location="${axis.dir}/common/classes"/>
+        <pathelement location="${axis.dir}/classes"/>
+        <fileset dir="${axis.dir}/lib">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+
+    <target name="clean"
+            description="Delete old build and dist directories">
+        <delete dir="${build.dir}"/>
+    </target>
+
+
+    <target name="build" description="Compile the project's source files"
+            depends="clean">
+        <mkdir dir="${build.dir}"/>
+        <javac destdir="${build.dir}"  debug="true"
+                deprecation="false" failonerror="true">
+            <src path="${src.dir}"/>
+            <classpath refid="master-classpath"/>
+        </javac>
+    </target>
+
+
+    <target name="deploy" description="Deploy the project to Tomcat"
+            depends="build">
+        <mkdir     dir="${deploy.dir}"/>
+        <copy    todir="${deploy.dir}">
+            <fileset dir="${build.dir}"/>
+        </copy>
+        <java
+                classname="org.apache.axis.client.AdminClient"
+                dir="."
+                fork="true"
+                failonerror="true">
+            <classpath>
+                <pathelement path="${build.dir}"/>
+                <path refid="master-classpath"/>
+            </classpath>
+            <arg line="-lhttp://localhost:8080/axis/services/AdminService resources/deploy.wsdd"/>
+        </java>
+
+        </target>
+
+    <target name="admin" description="Run the admin application"
+            depends="build">
+        <java classname="airService.admin.Admin" fork="true">
+            <classpath>
+                <pathelement path="build/" />
+                <pathelement path="resources/" />
+                <path refid="master-classpath"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="client" description="Run the client application"
+            depends="build">
+        <java classname="airService.client.Client" fork="true">
+            <classpath>
+                <pathelement path="build/" />
+                <pathelement path="resources/" />
+                <path refid="master-classpath"/>
+            </classpath>
+            <arg value="http://localhost:8080/axis/services/AirService?wsdl"/>
+        </java>
+    </target>
+</project>

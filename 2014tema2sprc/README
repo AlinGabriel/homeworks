@@ -1,0 +1,64 @@
+ARHIP ALIN-GABRIEL 342C3
+SISTEME DE PROGRAME PENTRU RETELE DE CALCULATOARE
+TEMA 2 - Serviciu web pentru rezervarea biletelor de avion
+
+CONTINUT ARHIVA
+    -    /src -sursele - Admin.java, Client.java , AirService.java , Flight.java
+    -   build.xml
+    -   README
+    -   init.sh  - este scriptul de initializare a serverului si de crearea a bazei de date
+    -   /scripts -  contine scriptul de creare si initializare a bazei de date , scris in php
+    -   /resources  - contine fisierul de proprietati pentru admin ("admin_login.properties"), 
+		    - fisierele de configurare pentru serverul de tomcat ("context.xml" si "web.xml"), 
+  		    - fisierul necesar deployment-ului aplicatiei ("deploy.wsdd"), 
+ 		    - jar-ul de mysql-connector necesar pentru conectarea serverului de tomcat la baza de date;
+   
+USER_NAME=root
+PASSWORD=alin
+
+    Am folosit apache-tomcat-6.0.36 si axis-1_4 pentru construirea serverului. 
+Aplicatia are nevoie ca fisierele axis-1_4/webapps/axis sa fie in apache-tomcat-6.0.36/webapps/,ca in laborator.
+    Pentru copierea fisierelor de configurare tomcat si construirea bazei de date mysql se poate rula scriptul "init.sh" din directorul temei. 
+    Inainte de asta, trebuie schimbata calea catre serverul tomcat in variabila TOMCAT_PATH.
+    Detaliile de conectare la baza de date (host, username, password) trebuie configurate in urmatoarele fisiere:
+    	- scripts/createDatabase.php pentru crearea bazei de date
+    	- resources/context.xml pentru serverul tomcat
+    	- resources/admin_login.properties pentru aplicatia de administrare
+
+    -  ./init.sh;
+    -   Serverul tomcat trebuie pornit: ./$TOMCAT_PATH/bin/startup.sh;
+        Fisierul build.xml pune la dispozitie 3 target-uri importante:
+    -   ant deploy: copiaza fisierele .class in serverul tomcat si face deploy la aplicatia web. Se va obtine astfel serviciul "AirService";
+    -   ant client: porneste aplicatia client care ofera 3 comenzi:
+             getOptimalRoute source, destination, maxFlights, departureDay
+             bookTicket flightID1, flightId2, ... , flightIdn
+             buyTicket reservationId, creditCardInfo
+             !!!    URL-ul catre serviciu poate fi schimbat in build.xml la targetul client
+    -    ant admin: porneste aplicatia de administrare care ofera 2 comenzi:
+           adaugare_Zbor source, destination, departureDay, departureHour, duration, numberOfSeats, flightId
+           anulare_Zbor flightId
+
+IMPLEMENTARE
+ADMIN - Aplicatia de administrarea realizeaza la inceput o conexiune la baza de date folosind detaliile din fisierul de proprietati 
+   "resources/admin_login.properties" cu DriverManager si asteapta comenzi.Pentru fiecare comanda creeaza query-uri sql si le executa prin JDBC.
+
+CLIENT - clientul realizeaza legatura cu webservice-ul AirService folosindu-se URL-ul dat ca parametru. Asteapta comenzi si 
+	realizeaza apeluri (Call) catre webservice in functie de parametrii dati si afiseaza rezultatele.
+
+SERVER - ofera cele 3 servicii: 
+			  - GetOptimalRoute executa query-uri SQL pentru o ruta cu maxim n zboruri se considera 
+			    toate rutele posibile de lungime de la 1 la n, considurandu-se de fiecare data cea mai scurta ca timp. 
+			    Acest lucru se face prin join-uri repetate cu tabela Flight, cu conditia ca destinatia unui 
+			    zbor sa fie aceeasi sursa urmatorului zbor, iar ora de plecare sa fie favorabila.
+        		  - BookTicket verifica fiecare zbor din ruta sa fie in starea "Available" si sa aiba locuri libere. 
+			    Daca toate zborurile indeplinesc aceste cerinte se creeaza intrari in FlightReservation pentru fiecare 
+			    zbor si o singura intrare in Reservation. Ca rezultat se intoarce id-ul liniei nou introduse in Reservation.
+       			  - BuyTicket creeaza o linie nou in tabela Ticket pe baza id-ului de rezervare primit.
+
+BAZA DE DATE are 4 tabele:  
+			- Flight contine toate detaliile unui zbor.
+			- FlightReservation si Reservation sunt folosite pentru realizarea unei rezervari. 
+			   Prima tabela contine referinte la Flight, deci reprezinta rezervari pentru fiecare zbor in parte, 
+			   iar la realizarea unei rezervari pentru o anumita ruta se va crea o intrare in Reservation 
+			   si mai multe intrari in FlightReservation cu referinte la linia noua din Reservation;
+			- Ticket contine detaliile despre bilet si referinta la rezervarea facuta (Reservation);

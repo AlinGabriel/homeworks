@@ -1,0 +1,133 @@
+\documentclass[a4paper]{article}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{enumitem}
+
+\author{
+\noindent\rule{10cm}{0.4pt}\vspace{0.1in}\\
+\textit{Responsabil tema}:\\Florin Pop (\texttt{florin.pop@cs.pub.ro})
+\vspace{0.15in}
+\\\textit{Termen de predare}:\\Duminica, 14 Decembrie, 2014, ora 23.55
+\vspace{0.15in}\\\noindent\rule{10cm}{0.4pt}
+}
+
+\title{Tema 3 - SPRC\\\textsc{Yet Another BitTorrent!}}
+\date{}
+
+\begin{document}
+\maketitle
+
+%%% -------------------------------------------------------------- %%%
+\section{Specificatii functionale}
+\label{sec1}
+
+\par Sa se implementeze o aplicatie peer-to-peer pentru download de fisiere din surse multiple, de tip BitTorrent (\url{http://www.bittorrent.com}).
+
+\par Arhitectura aplicatiei consta intr-un nod central si orice numar de clienti (\lq\lq{}peers\rq\rq{}). Nodul central si fiecare client pot rula pe aceeasi masina virtuala sau pe masini virtuale diferite. Clientii pot intra in retea sau pot parasi reteaua in orice moment, fara o notificare prealabila (asincron).
+
+\par Fisierele publicate rezida fizic pe clienti (fisierele nu vor fi incarcate pe nodul central). Fisierele publicate in cadrul retelei sunt unic identificate prin numele lor (cu alte cuvinte: doua fisiere cu acelasi nume, indiferent de locatia lor in retea, sunt identice bit cu bit). Cand un client publica un fisier, el il va imparti in fragmente de lungime egala, posibil cu exceptia ultimului fragment (care ar putea avea o lungime mai mica decat celelalte). Fiecare fragment astfel rezultat primeste un numar de ordine in secventa crescatoare, incepand cu 0. Fragmentarea unui fisier dat se face dupa un algoritm arbitrar (prin arbitrar se intelege la alegerea voastra), dar in mod identic pentru acelasi fisier, indiferent de clientul care publica fisierul si efectueaza fragmentarea, desi posibil in mod diferit de la fisier la fisier. Astfel, daca doi clienti publica un acelasi fisier (identificat prin numele sau), fragmentele acestuia pe cei doi clienti vor fi respectiv identice bit cu bit. Dupa fragmentarea initiala a unui fisier, clientul care il publica va anunta nodul central despre: (1) \texttt{numele fisierului}, (2) \texttt{dimensiunea totala a acestuia} si (3) \texttt{dimensiunea primului fragment} (restul informatiilor pot fi deduse).
+
+\par Vom numi o structura de date care contine aceste informatii \lq\lq{}\textbf{descrierea fisierului}\rq\rq{}. Pe langa descrierea fisierului, clientul care il publica va mai anunta nodul central despre adresa IP si portul pe care asculta cereri de download de la ceilalti clienti. Atat clientii cat si nodul central vor fi identificate prin adresa IP si portul pe care asculta. Adresa IP si portul nodului central se presupun cunoscute de toti clientii la initializare si nu se modifica in timpul rularii.
+
+\par Nodul central va asocia IP-ul clientului si portul (presupuse fixe) cu descrierea fisierului si cu fiecare din numerele de secventa ale fragmentelor care compun fisierul. Ulterior fragmentarii initiale a unui fisier publicat, un client poate oferi spre download celorlalti clienti, la cererea acestora, orice fragment individual din fisier, identificat prin numarul sau de ordine.
+
+\par Cand un client doreste sa downloadeze un fisier din retea, el va interoga mai intai nodul central, cu privire la fisierul identificat prin numele sau. Nodul central va raspunde acestei interogari cu:
+
+\begin{itemize}[noitemsep]
+	\item descrierea fisierului pentru fiecare fragment al fisierului (identificat prin numarul sau de ordine);
+	\item o lista de clienti (identificati prin adresele IP si porturile lor) care au anuntat anterior ca detin respectivul fragment.
+\end{itemize}
+
+\par Clientul isi poate alege apoi clientii (peers) de la care sa descarce, eventual in paralel, diferitele fragmente individuale ale fisierului. Algoritmul de alegere a unui anumit client (pentru download) din lista asociata unui fragment de fisier nu este impus. Clientii pot cere doar fragmente individuale de fisiere de la alti clienti; daca se doreste transferul integral al unui fisier (chiar si de la acelasi client), se vor initia cereri separate pentru fiecare din fragmentele fisierului.
+
+\par Imediat dupa downloadul unui fragment individual al unui fisier, clientul care l-a downloadat va anunta nodul central despre:
+
+\begin{itemize}[noitemsep]
+	\item numele fisierului;
+	\item numarul de secventa al fragmentului.
+\end{itemize}
+
+\par In acest fel nodul central va putea include IP-ul acestui client pe lista asociata respectivului fragment al fisierului, iar alti clienti vor putea cere de la acest client respectivul fragment de fisier.
+
+\par Pentru simplificare, vom presupune ca un fragment de fisier, o data publicat de un client, nu mai poate fi sters (unpublished) si ca, atata vreme cat este functional si accesibil, clientul va furniza celorlalti clienti respectivul fragment de fisier, la cererea lor. (Cu toate acestea, este posibil ca un client sa devina, temporar sau permanent, nefunctional sau inaccesibil prin retea, iar potentialii clienti care ar incerca sa interactioneze cu el vor fi toleranti la acest tip de erori).
+
+\par Atat clientii cat si nodul central vor fi capabile sa serveasca mai multi clienti simultan.
+
+%%% -------------------------------------------------------------- %%%
+\section{Specificatii non-functionale}
+\label{sec2}
+\begin{itemize}
+	\item Aplicatia trebuie sa fie scalabila cu numarul de clienti (peers) din retea si cu numarul total de fisiere publicate de acestia. Desi nu avem cerinte stricte legate de timing si alti parametri, va trebui sa aveti totusi in vedere aspectele legate de performanta si utilizarea resurselor.
+	\item Erorile de comunicatie (si erorile in general) trebuie rezolvate \lq\lq{}gracefully\rq\rq{}. In nici un caz nu sunt admise exceptii aruncate la runtime si netratate.
+	\item Aplicatia trebuie sa fie corect sincronizata, fara alte ipoteze simplificatoare.
+\end{itemize}
+
+%%% -------------------------------------------------------------- %%%
+\section{Ipoteze initiale}
+\label{sec3}
+
+\begin{itemize}[noitemsep]
+	\item IP-ul si portul nodului central sunt cunoscute de la inceput de toti clientii.
+	\item IP-ul si portul fiecarui client se presupun fixe pe parcursul executiei aplicatiei (portul poate diferi de la client la client).
+	\item Daca downloadul unui fragment de fisier este intrerupt (de exemplu, clientul de la care se downloadeaza devine inaccesibil), fragmentul partial posibil salvat pana in acel moment se ignora si nu va fi publicat.
+	\item Clientul poate continua sa ofere spre download fragmente individuale de fisier, chiar daca nu a reusit sa downloadeze toate fragmentele fisierului.
+	\item Nu ne intereseaza aspectele de autentificare (certificate, conexiuni securizate etc.) ale clientilor si fisierelor. Cu alte cuvinte, se presupune ca nu exista clienti malitiosi in retea.
+\end{itemize}
+
+%%% -------------------------------------------------------------- %%%
+\section{Constrangeri de implementare}
+\label{sec4}
+
+\begin{itemize}[noitemsep]
+	\item Implementarea se va realiza folosind Java (Version 7).
+	\item Atat clientii cat si nodul central sunt multithreaded.
+	\item Pentru comunicatia peste retea, se vor prefera clasele din pachetul java.nio (clasa \texttt{SocketChannel} va fi preferata clasei \texttt{Socket}, etc.).
+	\item Socketii neblocanti vor fi preferati socketilor blocanti.
+	\item Pentru a facilita testarea, clasa client se va numi \lq\lq{}Client\rq\rq{} si va trebui sa extinda clasa \texttt{AbstractClient} (pusa la dispozitie).
+	\item Pentru logging, se va folosi API-ul \texttt{log4j}. Logurile generate de aplicatia trimisa vor contine strict informatii legate de operatiile efectuate de clienti si de nodul central (formatul exact nu este specificat) si de eventualele erori (nu si mesaje de debug).
+	\item Pentru lansarea in executie a serverului se va folosi urmatoarea comanda (\texttt{server\_port} este portul pe care asculta serverul):
+
+\begin{verbatim}
+java Server server_port
+\end{verbatim}
+
+	\item Pentru lansarea in executie a clientului se va folosi urmatoarea comanda (\texttt{client\_port} este portul pe care asculta clientul, \texttt{server} IP-ul serverului si \texttt{server\_port} portul pe care asculta serverul):
+
+\begin{verbatim}	
+java Client server server_port client_port
+\end{verbatim}
+
+\end{itemize}
+
+%%% -------------------------------------------------------------- %%%
+\section{Specificatii de deployment}
+\label{sec5}
+
+\par Structura de directoare a temei trebuie sa includa cel putin urmatoarele:
+
+\begin{itemize}[noitemsep]
+	\item \texttt{src} : directorul radacina al surselor claselor de baza si al celor de test
+	\item \texttt{classes} : directorul radacina al claselor compilate
+	\item \texttt{lib} - jar-urile folosite de aplicatie, inclusiv \texttt{log4j<...>.jar}.
+	\item \texttt{logs} : directorul cu loguri generate de aplicatie
+	\item \texttt{doc} : documentatia temei; implementarea si utilizarea aplicatiei precum si descrierea algoritmilor folositi, cu accent pe portiunile de sincronizare intre threaduri.
+\end{itemize}
+
+\par Deployment-ul, compilarea si rularea aplicatiei se vor face folosind \texttt{ant}. Fisierul \texttt{build.xml} trebuie sa contina cel putin urmatoarele targeturi: \texttt{clean}, \texttt{build}, \texttt{run}. Tema trebuie organizata in asa fel incat deploymentul sa fie posibil pe orice masina (cu alte cuvinte, sa fie de tipul \lq\lq{}extract-compile-and-run\rq\rq{}, fara alte operatii de executat manual).
+
+%%% -------------------------------------------------------------- %%%
+\section{Observatii}
+\label{sec6}
+
+\begin{itemize}
+	\item Inainte de trimiterea temei de casa trebuie sa cititi cu atentie regulamentul cursului de SPRC disponibil pe site-ul cursului si sectiunile~\ref{sec4} si~\ref{sec5}.
+	\item Data fiind complexitatea temei, va sugeram sa va alocati timp suficient pentru ea.
+	\item Intrebarile cu privire la rezolvarea temei de casa se vor pune pe forumul dedicat acesteia, forum disponibil pe site-ul cursului. NU publicati bucati de cod sursa pe forum!
+\end{itemize}
+
+\end{document}

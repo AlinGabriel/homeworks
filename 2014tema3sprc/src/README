@@ -1,0 +1,50 @@
+//Arhip Alin-Gabriel Tema3 SPRC BitTorrent 
+
+Arhiva, fisiere sursa : Client.java - implementarea unui client
+contine 2 clase ajutatoare: ClientConnect si NewClient
+		Server.java - implementarea server-ului
+contine 1 clasa ajutatoare: ConnectNewClient
+Clase ajutatoare serializate:
+		FileDescriptor.java - structura ce contine 
+set-ere si get-ere pentru numele,dimensiunea unui fisier
+precum si dimensiunea unui fragment.
+		ClientDescriptor.java - structura ce 
+reprezinta adresa si portul unui client, ce contine metode
+de set si get ale acestora.
+ 		MessageDescriptor.java - structura ce 
+are metode de set si get pentru: obiecte de tip 
+FileDescriptor, ClientDescriptor, corpul unui mesaj, 
+un fragment de fisier, vectorul de octeti ale unui fisier
+precum si lista de owneri ai unui fisier. 
+		build.xml
+		README
+
+Exemplu rulare: ant run-server
+		ant run-client1
+		ant run-client2
+
+Detaliere implementare:
+Serverul porneste si asteapta permanent conexiuni de la clienti.
+Acesta contine toate informatiile cu privire la fisierele existente
+in sistem si ownerii(peers) fiecarui fisier in parte , deci o lista 
+cu toti ownerii. Pentru fiecare conexiune cu un client acesta deschide
+un thread nou (ConnectNewClient)
+Daca serverul primeste un mesaj de publicare atunci acesta va retine:
+-Numele fisierului, dimensiunea sa si dimensiunea unui fragment
+-Clientul care l-a trimis ( adresa si portul acestuia)
+Apoi serverul va cauta fisierul in lista de fisiere publicate si daca 
+nu exista il va adauga, iar daca exista va adauga clientul care l-a trimis
+in lista de owneri.
+Daca serverul primeste un mesaj de retrieve atunci acesta va cauta 
+numele fisierului in lista de fisiere publicate si daca il contine ii 
+va face retrive, altfel daca nu l gaseste nu va intoarce nimic.
+Clientii pot uploada/downloada fisiere din sistem dar in acelasi timp
+ei asteapta conexiuni intre ei in caz ca exista peeri care doresc sa 
+descarce fragmente de fisiere. Acestea se vor executa in paralel de la 
+diferiti peeri. NewClient se ocupa de uploadarea unui fisier
+Connect se ocupa de downloadarea unui fisier.
+Am implementat in asa fel incat un Client va incerca pentru fiecare fragment
+al unui fisier , sa aleaga un peer diferit de la care sa il downloadeze.
+Am oferit detalii de implementare si in cod.
+
+End of Readme.

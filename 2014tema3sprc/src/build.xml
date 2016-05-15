@@ -1,0 +1,62 @@
+<project name="SPRC_T3" default="build" basedir=".">
+	<description>Tema 3 SPRC</description>
+	<property name="src" location="src"/>
+	<property name="build" location="classes"/>
+ 
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}"/>
+	</target>
+	
+	<target name="build" depends="init" description="compile the source " >
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac srcdir="${src}" destdir="${build}" includeantruntime="false">
+			<classpath>
+				<pathelement location="lib/log4j-1.2.12.jar"/>
+				<pathelement path="${java.class.path}"/>
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="clean" description="clean up" >
+	    <!-- Delete the ${build} and ${dist} directory trees -->
+	    <delete dir="${build}"/> 
+	</target>
+ 
+	<target name="run-server" depends="build">
+	    <java fork="true" classname="server.Server">
+			<arg value="5555"/>
+			<classpath> 
+				<pathelement location="lib/log4j-1.2.12.jar"/> 
+				<pathelement path="classes"/>
+			</classpath>
+		</java>
+ 	</target>
+ 	
+ 	<target name="run-client1" depends="build">
+		<java fork="true" classname="test.TestClient1">
+			<arg value="localhost"/>
+			<arg value="5555"/>
+			<arg value="4444"/>
+			<classpath> 
+				<pathelement location="lib/log4j-1.2.12.jar"/> 
+				<pathelement path="classes"/>
+			</classpath>
+		</java>
+	</target>
+	
+	<target name="run-client2" depends="build">		
+		<java fork="true" dir="classes" classname="test.TestClient2">
+			<arg value="localhost"/>
+			<arg value="5555"/>
+			<arg value="7777"/>
+			<classpath> 
+				<pathelement location="lib/log4j-1.2.12.jar"/> 
+				<pathelement path="classes"/>
+			</classpath>
+		</java>		 	
+	</target>
+	
+</project> 

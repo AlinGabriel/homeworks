@@ -9,27 +9,28 @@ abstract class Agent {
 		currPos = newPos = new Point();
 		name = string;
 	}
-	
-	public String getName(){
+
+	public String getName() {
 		return name;
 	}
-	
+
 	public void setCurrPos(Point pos) {
 		currPos.setLocation(pos);
 	}
-	
+
 	public Point getCurrPos() {
 		return currPos;
 	}
-	
-	public void setNewPos(Point pos){
+
+	public void setNewPos(Point pos) {
 		newPos.setLocation(pos);
 	}
-	
+
 	public Point getNewPos() {
 		return newPos;
 	}
 
-	abstract void move();
+	abstract void moveToRock();
+
 	abstract void moveToBase();
 }

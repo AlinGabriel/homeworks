@@ -13,27 +13,35 @@ public class Board {
 		basePos = new Point();
 		m = new String[10][10];
 	}
-	
+
 	public static Board getInstance() {
 		if (instance == null) {
 			instance = new Board();
 		}
 		return instance;
 	}
-	
+
+	public boolean isEmpty() {
+		for (int i = 0; i < m.length; i++)
+			for (int j = 0; j < m.length; j++)
+				if (m[i][j] != "o" && m[i][j] != "#" && m[i][j] != "B")
+					return false;
+		return true;
+	}
+
 	public void setAgentPos(Agent agent) {
 		m[agent.getCurrPos().x][agent.getCurrPos().y] = agent.getName();
 	}
-	
+
 	public void setBasePos(Point basePos) {
 		this.basePos = basePos;
 		m[basePos.x][basePos.y] = "B";
 	}
-	
+
 	public Point getBasePos() {
 		return basePos;
 	}
-		
+
 	public void createBoard() {
 		Random r;
 		int i, j, obs, rocks;
@@ -61,19 +69,19 @@ public class Board {
 		System.out.println("Remaining rocks: " + this.countRemainingRocks("*"));
 		System.out.println("===================");
 	}
-	
-	public boolean hasRocks(){
+
+	public boolean hasRocks() {
 		if (countRemainingRocks("*") != 0)
 			return true;
 		return false;
 	}
-	
+
 	public boolean hasRocksDug() {
 		if (countRemainingRocks("b") != 0)
 			return true;
 		return false;
 	}
-	
+
 	public int countRemainingRocks(String rock) {
 		int rocks = 0;
 		for (int i = 0; i < m.length; i++)

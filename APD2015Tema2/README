@@ -1,0 +1,63 @@
+/* Tema #2 APD
+ * Noiembrie 2015
+ * Procesarea documentelor folosind paradigma Map-Reduce
+ */
+ 
+Continut arhiva
+	src/
+		tema2.java 
+ 	 	WorkPool.java
+	
+	build.xml - fisierul pentru sistemul de build Ant
+	README - acest fisier
+	
+Utilizare
+	ant compile jar
+	java -jar mapreduce.jar <NT> <INPUTFILE> <OUTUPUTFILE>
+ 
+Clasa WorkPool 
+	- preluata din laboratorul 5 cu ReplicatedWorkers
+	- contine o lista inlantuita ce va retine task-uri de Map si Reduce
+	- putWork() adauga un task nou. Acesta poate fi de Map sau de Reduce
+	- getWork() extrage un task din lista. 
+	
+Clasa Triplet
+	- clasa ajutatoare
+	- retine un triplet format din oricare 3 tipuri de elemente.
+	- contine get-ere pentru fiecare element
+	- folosit la operatiile de tip Map pentru stocarea rezultatelor.
+	Fiecare fragment de fisier va avea un triplet de forma:
+	(fisier, hash_perechi_fragment(lung, nr), lista_cuv_max_fragment)
+	- folosit la operatiile de tip Reduce pentru stocarea rezultatelor.
+	Fiecare fisier va avea un triplet de forma:
+	(rang, hash_perechi_fisier(lung, nr), lista_cuv_max_fisier)
+	
+	
+Clasa PartialSolution
+	- reprezinta un task de tip Map si va retine doar informatiile 
+	specificate in enuntul temei: numele fisierului, offset-ul de start 
+	si dimensiunea fragmentului de procesat.
+			 
+Clasa Solution
+ 	- reprezinta un task de tip Reduce si va retine: numele fisierului, 
+  	o lista cu toate hash-urile de perechi(lung, nr) pentru acel fisier si
+  	o alta lista cu toate listele de cuvinte maximale pe fiecare fragment.
+
+Clasa Worker 
+	- contine - un WorkPool
+	- contine metode sincronizate de Map si Reduce
+	- metoda doMap() ce reprezinta un Map al unui fragment
+	- metoda doReduce() ce reprezinta un Reduce al unui document 
+	- metoda fib(n) ce calculeaza al n-lea element din Sirul lui Fibonacci
+	- metoda run(): extrage un task din workpool, verifica tipul task-ului
+	si in functie de rezultat il prelucreza executand fie Map fie Reduce.
+	     
+Clasa tema2: 
+	- clasa pricipala
+	- se foloseste acelasi workpool pentru ambele operatii.
+	- realizeaza citirea datelor de intrare
+	- creeaza task-urile de Map, apoi porneste executia lor 
+	si asteapta terminarea operatiilor de Map
+	- creeaza task-urile de Reduce, porneste executia lor si din nou
+	se asteapta terminarea tuturor operatiilor de Reduce.
+	- in final se scrie in fisierul de iesire rezultatele obinute.
